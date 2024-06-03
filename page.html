@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check Available Classrooms</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Custom CSS -->
+  <style>
+    .container {
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center">Check Available Classrooms</h1>
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <form id="checkAvailabilityForm">
+          <div class="form-group">
+            <label for="date">Date:</label>
+            <input type="date" class="form-control" id="date" required>
+          </div>
+          <div class="form-group">
+            <label for="startTime">Start Time:</label>
+            <input type="time" class="form-control" id="startTime" required>
+          </div>
+          <div class="form-group">
+            <label for="endTime">End Time:</label>
+            <input type="time" class="form-control" id="endTime" required>
+          </div>
+          <button id="bt" name="bt" type="submit" class="btn btn-primary btn-block">Check Availability</button>
+        </form>
+      </div>
+    </div>
+    <div class="row justify-content-center mt-4">
+      <div class="col-md-6">
+        <h3>Available Classrooms:</h3>
+        <table class="table">
+          <tbody id="availableClassrooms">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and jQuery (required for Bootstrap) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+  
+	const calendarid=["Classroom 3:5e57ccf81e3c570018823a83","Classroom 4:5e5e3fef298ef80018a5f6a4","Classroom 5:5e57cd3c97b131001772e740","Classroom 6:5e57cd7c64109f0017d6b904","Classroom 8:5e57cdc01e3c570018823a99","Classroom A1:5e57c57d1e3c5700188239dd","Classroom A2:5e57c68e1e3c5700188239f5","Classroom A3:5e57c6d61e3c570018823a04","Classroom C6:5e57c73364109f0017d6b81f","Classroom C7:5e57c775121a4c0017830bdf","Classroom E1:5e57c7b764109f0017d6b82c","Classroom E2:5e57c8b197b131001772e6af","Classroom E3:5e57c8fa64109f0017d6b840","Classroom E4:5e57c98397b131001772e6c1","Classroom E6:5e57c9d797b131001772e6c8","Classroom E7:5e57ca991e3c570018823a59","Classroom E8:5e57cae764109f0017d6b89f","Classroom EF1:5e57cbc497b131001772e70d","Classroom EF2:5e57cc2a121a4c0017830c78","Classroom EF3:5e57cc6d64109f0017d6b8cc","Classroom EF4:5e57ccb064109f0017d6b8e4","Classroom F2:5e57cb74121a4c0017830c55"]
+	let available=[];
+  
+    document.getElementById('checkAvailabilityForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+	  var availableClassroomsTable = $('#availableClassrooms');
+	  availableClassroomsTable.empty();
+	  var row = $('<tr><td colspan="3">Loading...</td></tr>');
+      availableClassroomsTable.append(row);
+	  document.getElementById("bt").disabled = true;
+	  available.length = 0
+	
+      // Get date, start time, and end time values
+      var date = document.getElementById('date').value;
+      var startTime = document.getElementById('startTime').value;
+      var endTime = document.getElementById('endTime').value;
+	  
+	  document.getElementById('startTime').value = startTime.split(":")[0]+":00";
+	  document.getElementById('endTime').value = endTime.split(":")[0]+":00";
+
+	  //subtract 2 hours cause timezone
+	  
+	  startTime = (('0'+(startTime.split(":")[0]-2)).slice(-2))+":"+(startTime.split(":")[1]);
+	  endTime = (('0'+(endTime.split(":")[0]-2)).slice(-2))+":"+(endTime.split(":")[1]);
+
+      // Call the API to get occupied classrooms
+	  
+	  //console.log(startTime);
+	  //console.log(endTime);
+	  
+	  callAPI(date, startTime, endTime, 0);
+	  
+    });
+
+	function callAPI(date, startTime, endTime, index){
+			
+			var xhr = new XMLHttpRequest();
+			xhr.open("POST", 'https://unipv.prod.up.cineca.it/api/Impegni/getImpegniCalendarioPubblico', true);
+			xhr.setRequestHeader('Content-Type', 'application/json');
+			xhr.send(JSON.stringify({
+				
+				//parameters to be sent:
+			
+				"linkCalendarioId": calendarid[index].split(":")[1],
+				"mostraImpegniAnnullati": true,
+				"mostraIndisponibilitaTotali": false,
+				"clienteId": "5a6734b248e4aa0cdeaaf875",
+				"pianificazioneTemplate": false,
+				"dataInizio": date + "T" + "07:00" + ":00.000Z",
+				"dataFine": date + "T" + "16:00" + ":00.000Z"
+				
+			}));
+			
+			xhr.onreadystatechange = function() { 
+
+				if (xhr.readyState == 4 && xhr.status == 200){
+				
+					//code if request goes well:
+				
+					var resp = xhr.responseText;
+					
+					p=JSON.parse(xhr.responseText);
+					
+					//response data is now inside resp variable
+					
+					let j;
+					let b=false;
+					for(j=0;j<p.length;j++){
+						let st = parseInt(startTime.split(":")[0]);
+						let di = parseInt(p[j]['dataInizio'].split("T")[1].split(":")[0]);
+						let et = parseInt(endTime.split(":")[0]);
+						let df = parseInt(p[j]['dataFine'].split("T")[1].split(":")[0]);
+						
+						/*if((st>=di)&&(st<et)){
+							b=true;
+						}
+						
+						if((et<=df)&&(et>di)){
+							b=true;
+						}*/
+						
+						if((st<df)&&(di<et)){
+							b=true;
+						}
+						
+						if(b==true){
+							break;
+						}
+					}
+					
+					if(b==false){
+						available.push(calendarid[index].split(":")[0]);
+					}
+					
+					if((index+1)<calendarid.length){
+						callAPI(date, startTime, endTime, index+1);
+					}else{
+						display();
+					}
+					
+				} else {
+					//console.log("error");
+				}
+		  
+			}
+	
+	}
+
+	function display(){
+	
+		var availableClassroomsTable = $('#availableClassrooms');
+		availableClassroomsTable.empty();
+	
+		let i;
+		
+		for(i=0;i<available.length;i++){
+		
+			var row = $('<tr></tr>');
+			row.append('<td>' + available[i] + '</td>');
+			availableClassroomsTable.append(row);
+			
+		}
+		
+		if (available.length == 0) {
+			var row = $('<tr><td colspan="3">No available classrooms</td></tr>');
+			availableClassroomsTable.append(row);
+		}
+		
+		document.getElementById("bt").disabled = false;
+	
+	}
+
+
+  </script>
+</body>
+</html>
