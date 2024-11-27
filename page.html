@@ -31,6 +31,10 @@
             <label for="endTime">End Time:</label>
             <input type="time" class="form-control" id="endTime" required>
           </div>
+		 
+		<input type="checkbox" id="adjustinput" checked>
+		<label for="vehicle1"> Adjust hours</label><br>
+		
           <button id="bt" name="bt" type="submit" class="btn btn-primary btn-block">Check Availability</button>
         </form>
       </div>
@@ -53,10 +57,11 @@
 
   <script>
   
-	const calendarid=["Classroom 3:5e57ccf81e3c570018823a83","Classroom 4:5e5e3fef298ef80018a5f6a4","Classroom 5:5e57cd3c97b131001772e740","Classroom 6:5e57cd7c64109f0017d6b904","Classroom 8:5e57cdc01e3c570018823a99","Classroom A1:5e57c57d1e3c5700188239dd","Classroom A2:5e57c68e1e3c5700188239f5","Classroom A3:5e57c6d61e3c570018823a04","Classroom C6:5e57c73364109f0017d6b81f","Classroom C7:5e57c775121a4c0017830bdf","Classroom E1:5e57c7b764109f0017d6b82c","Classroom E2:5e57c8b197b131001772e6af","Classroom E3:5e57c8fa64109f0017d6b840","Classroom E4:5e57c98397b131001772e6c1","Classroom E6:5e57c9d797b131001772e6c8","Classroom E7:5e57ca991e3c570018823a59","Classroom E8:5e57cae764109f0017d6b89f","Classroom EF1:5e57cbc497b131001772e70d","Classroom EF2:5e57cc2a121a4c0017830c78","Classroom EF3:5e57cc6d64109f0017d6b8cc","Classroom EF4:5e57ccb064109f0017d6b8e4","Classroom F2:5e57cb74121a4c0017830c55"]
+	const calendarid=["Classroom 2:65fc578afd10fb04c9234e1e","Classroom 3:5e57ccf81e3c570018823a83","Classroom 4:5e5e3fef298ef80018a5f6a4","Classroom 5:5e57cd3c97b131001772e740","Classroom 6:5e57cd7c64109f0017d6b904","Classroom 8:5e57cdc01e3c570018823a99","Classroom A1:5e57c57d1e3c5700188239dd","Classroom A2:5e57c68e1e3c5700188239f5","Classroom A3:5e57c6d61e3c570018823a04","Classroom C6:5e57c73364109f0017d6b81f","Classroom C7:5e57c775121a4c0017830bdf","Classroom E1:5e57c7b764109f0017d6b82c","Classroom E2:5e57c8b197b131001772e6af","Classroom E3:5e57c8fa64109f0017d6b840","Classroom E4:5e57c98397b131001772e6c1","Classroom E6:5e57c9d797b131001772e6c8","Classroom E7:5e57ca991e3c570018823a59","Classroom E8:5e57cae764109f0017d6b89f","Classroom EF1:5e57cbc497b131001772e70d","Classroom EF2:5e57cc2a121a4c0017830c78","Classroom EF3:5e57cc6d64109f0017d6b8cc","Classroom EF4:5e57ccb064109f0017d6b8e4","Classroom F2:5e57cb74121a4c0017830c55"]
 	let available=[];
   
     document.getElementById('checkAvailabilityForm').addEventListener('submit', function(event) {
+	
       event.preventDefault();
 
 	  var availableClassroomsTable = $('#availableClassrooms');
@@ -126,6 +131,18 @@
 						let di = parseInt(p[j]['dataInizio'].split("T")[1].split(":")[0]);
 						let et = parseInt(endTime.split(":")[0]);
 						let df = parseInt(p[j]['dataFine'].split("T")[1].split(":")[0]);
+						
+						if(document.getElementById("adjustinput").checked){
+	  
+							if((st==9)||(st==14)){
+								st=st+1;
+							}
+							
+							//if((et==9)||(et==14)){ NO
+								//et=et-1;
+							//}
+						  
+						 }
 						
 						/*if((st>=di)&&(st<et)){
 							b=true;
